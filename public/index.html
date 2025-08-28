@@ -111,10 +111,10 @@
               </div>
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <label for="dateOut" class="form-label">Date</label>
               <input type="date" class="form-control" id="dateOut" required />
-            </div>
+            </div> -->
             <button type="submit" id="submitButton" class="btn btn-danger">
               Send Money
             </button>
@@ -343,7 +343,9 @@
 
   const selectedEmail = userSelectInput.value;
   const selectedAmount = amountInput.value;
-  const selectedDate = dateInput.value;
+  // const selectedDate = dateInput.value;
+  const selectedDate = new Date().toISOString().split("T")[0]; 
+
 
   const payload = {
     type: currentTransactionType,
