@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Money Transfer Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Mobile-friendly summary cards in column for small screens */
+      @media (max-width: 576px) {
+        #transactionUserSummary {
+          flex-direction: column !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-4 mb-4">
+      <div class="container d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Money Transfer Tracker Dashboard</h1>
+        <a href="register.html" class="btn btn-warning fw-bold"
+          >➕ Register User</a
+        >
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- User Filter -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h5 text-primary mb-3">View User Dashboard</h2>
+          <div class="input-group">
+            <select id="dashboardSelect" class="form-select">
+              <option value="">-- Select User --</option>
+            </select>
+            <button
+              class="btn btn-outline-primary"
+              onclick="openUserDashboard()"
+            >
+              Open Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Transaction -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h5 text-primary mb-3">New Transaction</h2>
+
+          <!-- Toggle Buttons -->
+          <div class="d-flex mb-3 align-items-center">
+            <button type="button" id="btnSend" class="btn btn-danger me-2">
+              Send
+            </button>
+            <button type="button" id="btnReceive" class="btn btn-success">
+              Receive
+            </button>
+          </div>
+
+          <form id="transactionForm">
+            <div class="mb-3">
+              <label for="amountOut" class="form-label">Amount</label>
+              <input
+                type="number"
+                class="form-control"
+                id="amountOut"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="receiverOut" class="form-label" id="userLabel"
+                >Receiver</label
+              >
+              <select id="receiverOut" class="form-select" required></select>
+            </div>
+
+            <!-- Transaction Summary -->
+            <div
+              class="d-flex row mb-3"
+              id="transactionUserSummary"
+              style="display: none"
+            >
+              <div class="col-md-4 mb-2">
+                <div class="card text-white bg-danger">
+                  <div class="card-body text-center p-2">
+                    <h6 class="card-title mb-1">Total Sent</h6>
+                    <p class="card-text mb-0" id="summarySent">₹ 0.00</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-2">
+                <div class="card text-white bg-success">
+                  <div class="card-body text-center p-2">
+                    <h6 class="card-title mb-1">Total Received</h6>
+                    <p class="card-text mb-0" id="summaryReceived">₹ 0.00</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-2">
+                <div class="card text-white bg-info">
+                  <div class="card-body text-center p-2">
+                    <h6 class="card-title mb-1">Balance</h6>
+                    <p class="card-text mb-0" id="summaryBalance">₹ 0.00</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="dateOut" class="form-label">Date</label>
+              <input type="date" class="form-control" id="dateOut" required />
+            </div>
+            <button type="submit" id="submitButton" class="btn btn-danger">
+              Send Money
+            </button>
+          </form>
+          <!-- WhatsApp button container -->
+          <div id="whatsappContainer" class="mt-2"></div>
+        </div>
+      </div>
+
+      <!-- Transactions -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 text-primary mb-3">Transaction History</h2>
+          <div
+            class="table-responsive"
+            style="max-height: 400px; overflow-y: auto"
+          >
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>User</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+      <div
+        id="liveToast"
+        class="toast align-items-center text-bg-success border-0"
+        role="alert"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="toastMessage">
+            ✅ Transaction added successfully!
+          </div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const API_BASE_URL = window.location.origin;
+
+      const toastEl = document.getElementById("liveToast");
+      const toastBody = document.getElementById("toastMessage");
+      const toast = new bootstrap.Toast(toastEl);
+
+      function showToast(message, type = "success") {
+        toastEl.className = `toast align-items-center text-bg-${type} border-0`;
+        toastBody.textContent = message;
+        toast.show();
+      }
+
+      // DOM Elements
+      const btnSend = document.getElementById("btnSend");
+      const btnReceive = document.getElementById("btnReceive");
+      const transactionForm = document.getElementById("transactionForm");
+      const amountInput = document.getElementById("amountOut");
+      const userSelectInput = document.getElementById("receiverOut");
+      const dateInput = document.getElementById("dateOut");
+      const userLabel = document.getElementById("userLabel");
+      const submitButton = document.getElementById("submitButton");
+      const whatsappContainer = document.getElementById("whatsappContainer");
+
+      const summaryContainer = document.getElementById(
+        "transactionUserSummary"
+      );
+      const summarySent = document.getElementById("summarySent");
+      const summaryReceived = document.getElementById("summaryReceived");
+      const summaryBalance = document.getElementById("summaryBalance");
+
+      let currentTransactionType = "Out"; // default Send
+      let allTransactions = []; // global storage for transactions
+      let selectedUserName = "";
+      let selectedUserPhone = "";
+      let allUsers = []; // global
+
+      // Fetch users and transactions
+      async function fetchDataAndRender() {
+        try {
+          const [usersRes, transactionsRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/users`),
+            fetch(`${API_BASE_URL}/transactions`),
+          ]);
+
+          const users = await usersRes.json();
+          allUsers = users; // store users globally
+          const transactions = await transactionsRes.json();
+
+          allTransactions = transactions; // store globally
+
+          populateUserOptions(users);
+          renderTransactions(transactions);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          showToast("Failed to load data. Please check the server.", "danger");
+        }
+      }
+
+      function populateUserOptions(users) {
+  const defaultOption = `<option value="">-- Select User --</option>`;
+
+  // Dashboard dropdown
+  const dashboardSelect = document.getElementById("dashboardSelect");
+  dashboardSelect.innerHTML = defaultOption;
+  users.forEach(u => {
+    dashboardSelect.innerHTML += `<option value="${u.email}">${u.name} (${u.email})</option>`;
+  });
+
+  // Form dropdown
+  const userSelectInput = document.getElementById("receiverOut");
+  userSelectInput.innerHTML = defaultOption;
+  users.forEach(u => {
+    userSelectInput.innerHTML += `<option value="${u.email}">${u.name} (${u.email})</option>`;
+  });
+}
+
+      function renderTransactions(transactions) {
+        const table = document.getElementById("transactionTable");
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date)); // latest first
+        table.innerHTML = transactions
+          .map(
+            (t) => `<tr>
+              <td class="${
+                t.type === "In" ? "text-success fw-bold" : "text-danger fw-bold"
+              }">${t.type}</td>
+              <td>₹ ${t.amount}</td>
+              <td>${t.user}</td>
+              <td>${t.date}</td>
+            </tr>`
+          )
+          .join("");
+      }
+
+      // Toggle transaction type
+      function updateFormUI() {
+        if (currentTransactionType === "Out") {
+          btnSend.classList.add("btn-danger");
+          btnSend.classList.remove("btn-outline-secondary");
+          btnReceive.classList.remove("btn-success");
+          btnReceive.classList.add("btn-outline-secondary");
+          userLabel.textContent = "Receiver";
+          submitButton.textContent = "Send Money";
+          submitButton.className = "btn btn-danger";
+        } else {
+          btnReceive.classList.add("btn-success");
+          btnReceive.classList.remove("btn-outline-secondary");
+          btnSend.classList.remove("btn-danger");
+          btnSend.classList.add("btn-outline-secondary");
+          userLabel.textContent = "Sender";
+          submitButton.textContent = "Money Received";
+          submitButton.className = "btn btn-success";
+        }
+      }
+
+      btnSend.onclick = () => {
+        currentTransactionType = "Out";
+        updateFormUI();
+      };
+
+      btnReceive.onclick = () => {
+        currentTransactionType = "In";
+        updateFormUI();
+      };
+
+      // Update summary cards
+      function updateTransactionSummary(userEmail) {
+        if (!userEmail) {
+          summaryContainer.style.display = "none";
+          return;
+        }
+
+        let totalSent = 0;
+        let totalReceived = 0;
+
+        allTransactions.forEach((t) => {
+          if (t.user === userEmail) {
+            if (t.type === "Out") totalSent += parseFloat(t.amount);
+            else if (t.type === "In") totalReceived += parseFloat(t.amount);
+          }
+        });
+
+        const balance = totalReceived - totalSent;
+
+        summarySent.textContent = `${totalSent.toFixed(2)}`;
+        summaryReceived.textContent = `${totalReceived.toFixed(2)}`;
+        summaryBalance.textContent = `${balance.toFixed(2)}`;
+
+        summaryContainer.style.display = "flex";
+      }
+
+      // Listen for dropdown change
+      userSelectInput.addEventListener("change", async () => {
+        const email = userSelectInput.value;
+        if (!email) return;
+
+        const usersRes = await fetch(`${API_BASE_URL}/users`);
+        const users = await usersRes.json();
+        const user = users.find((u) => u.email === email);
+        if (user) {
+          selectedUserName = user.name;
+          selectedUserPhone = user.whatsapp;
+        }
+
+        updateTransactionSummary(email);
+      });
+
+      // Form submission
+      transactionForm.onsubmit = async (e) => {
+  e.preventDefault();
+
+  const selectedEmail = userSelectInput.value;
+  const selectedAmount = amountInput.value;
+  const selectedDate = dateInput.value;
+
+  const payload = {
+    type: currentTransactionType,
+    amount: selectedAmount,
+    user: selectedEmail,
+    date: selectedDate,
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/transactions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      showToast(
+        `✅ ${currentTransactionType === "In" ? "Money In" : "Money Out"} recorded!`
+      );
+
+      // ✅ Refresh data first so summaries update
+      await fetchDataAndRender();
+      await updateTransactionSummary(selectedEmail);
+
+      // ✅ Now read the updated totals
+      const totalReceived = summaryReceived.textContent.replace("₹ ", "");
+      const totalSent = summarySent.textContent.replace("₹ ", "");
+      const balance = summaryBalance.textContent.replace("₹ ", "");
+
+      // Reset form
+      transactionForm.reset();
+
+      // --- WhatsApp link ---
+      const userObj = allUsers.find((u) => u.email === selectedEmail);
+      if (userObj && userObj.whatsapp) {
+        const message = `Hi ${userObj.name},%0A%0AA new transaction was recorded:%0AType: ${
+          currentTransactionType === "In" ? "Money Received" : "Money Sent"
+        }%0AAmount: ₹${selectedAmount}%0ADate: ${selectedDate}%0A%0ATotal Received: ₹${totalReceived}%0ATotal Sent: ₹${totalSent}%0ABalance: ₹${balance}%0A%0AThank you for using Money Transfer Tracker!`;
+
+        const whatsappLink = `https://api.whatsapp.com/send?phone=${userObj.whatsapp.replace(
+          /\D/g,
+          ""
+        )}&text=${message}`;
+        window.open(whatsappLink, "_blank");
+      } else {
+        console.log(
+          "❌ WhatsApp number missing for user:",
+          userObj ? userObj.name : selectedEmail
+        );
+        showToast("❌ WhatsApp number not available for this user.", "danger");
+      }
+    } else {
+      showToast("❌ Failed to record transaction", "danger");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Failed to connect to server", "danger");
+  }
+};
+
+      function openUserDashboard() {
+  const email = document.getElementById("dashboardSelect").value;
+  if (!email) {
+    showToast("Please select a user first!", "warning");
+    return;
+  }
+  window.location.href = `user.html?user=${email}`;
+}
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        fetchDataAndRender();
+      });
+    </script>
+  </body>
+</html>

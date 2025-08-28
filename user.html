@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>User Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <header
+      class="bg-primary text-white text-center py-4 mb-4 d-flex justify-content-between align-items-center px-3"
+    >
+      <h1 class="h3 m-0" id="userTitle">User Dashboard</h1>
+      <button id="deleteUserBtn" class="btn btn-danger btn-sm">
+        🗑 Delete User
+      </button>
+    </header>
+
+    <div class="container">
+      <!-- Summary Cards -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="text-success">Money Received</h5>
+              <p class="fs-4 fw-bold" id="moneyIn">₹ 0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="text-danger">Money Sent</h5>
+              <p class="fs-4 fw-bold" id="moneyOut">₹ 0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="text-primary">Balance</h5>
+              <p class="fs-4 fw-bold" id="balance">₹ 0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 text-primary mb-3">User Transactions</h2>
+
+          <!-- Date Filter -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <input
+                type="date"
+                id="startDate"
+                class="form-control"
+                placeholder="Start Date"
+              />
+            </div>
+            <div class="col-md-4">
+              <input
+                type="date"
+                id="endDate"
+                class="form-control"
+                placeholder="End Date"
+              />
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+              <button id="filterBtn" class="btn btn-primary flex-fill">
+                Filter
+              </button>
+              <button id="clearBtn" class="btn btn-secondary flex-fill">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="userTransactions"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <a href="index.html" class="btn btn-outline-secondary"
+          >⬅ Back to Dashboard</a
+        >
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+      <div
+        id="liveToast"
+        class="toast align-items-center text-bg-success border-0"
+        role="alert"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="toastMessage">✅ Action successful!</div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const API_BASE_URL = window.location.origin;
+
+      const toastEl = document.getElementById("liveToast");
+      const toastBody = document.getElementById("toastMessage");
+      const toast = new bootstrap.Toast(toastEl);
+
+      function showToast(message, type = "success") {
+        toastEl.className = `toast align-items-center text-bg-${type} border-0`;
+        toastBody.textContent = message;
+        toast.show();
+      }
+
+      // Use a custom modal instead of alert/confirm
+      function showConfirmationModal(message, onConfirm, onCancel) {
+        const modalHtml = `
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">${message}</div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
+        const confirmModal = new bootstrap.Modal(
+          document.getElementById("confirmModal")
+        );
+        confirmModal.show();
+
+        document
+          .getElementById("confirmDeleteBtn")
+          .addEventListener("click", () => {
+            confirmModal.hide();
+            onConfirm();
+          });
+
+        document
+          .getElementById("confirmModal")
+          .addEventListener("hidden.bs.modal", () => {
+            document.getElementById("confirmModal").remove();
+          });
+      }
+
+      // Function to render transactions (with optional filter)
+      async function renderTransactions(startDate = null, endDate = null) {
+        try {
+          const usersRes = await fetch(`${API_BASE_URL}/users`);
+          const transactionsRes = await fetch(`${API_BASE_URL}/transactions`);
+
+          const users = await usersRes.json();
+          const transactions = await transactionsRes.json();
+
+          const params = new URLSearchParams(window.location.search);
+          const userEmail = params.get("user");
+
+          
+if (!userEmail) {
+  document.getElementById("userTitle").innerText = "User not found!";
+  document.getElementById("deleteUserBtn").style.display = "none";
+  document.getElementById("userTransactions").innerHTML =
+    `<tr><td colspan="3">User not found.</td></tr>`;
+  return;
+}
+const user = users.find((u) => u.email === userEmail);
+
+if (!user) {
+  document.getElementById("userTitle").innerText = "User not found!";
+  document.getElementById("deleteUserBtn").style.display = "none";
+  document.getElementById("userTransactions").innerHTML =
+    `<tr><td colspan="3">User not found.</td></tr>`;
+  return;
+}
+
+          // const user = users[userIndex];
+          document.getElementById("userTitle").innerText =
+            user.name + "'s Dashboard";
+
+          let totalIn = 0,
+            totalOut = 0;
+
+const userRows = transactions
+  .filter((t) => t.user === user.email)
+  .filter((t) => {
+    if (!startDate && !endDate) return true;
+    const txDate = new Date(t.date);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+    if (start && txDate < start) return false;
+    if (end && txDate > end) return false;
+    return true;
+  })
+  .map((t) => {
+    if (t.type === "In") totalIn += parseFloat(t.amount);
+    if (t.type === "Out") totalOut += parseFloat(t.amount);
+    return `<tr>
+      <td class="${
+        t.type === "In" ? "text-success fw-bold" : "text-danger fw-bold"
+      }">${t.type === "In" ? "Money Received" : "Money Sent"}</td>
+      <td>₹ ${t.amount}</td>
+      <td>${t.date}</td>
+    </tr>`;
+  })
+  .join("");
+
+
+          // Update transactions table
+          document.getElementById("userTransactions").innerHTML =
+            userRows || `<tr><td colspan="3">No transactions found.</td></tr>`;
+
+          // Update summary cards
+          document.getElementById("moneyIn").innerText = "₹ " + totalIn;
+          document.getElementById("moneyOut").innerText = "₹ " + totalOut;
+          document.getElementById("balance").innerText =
+            "₹ " + (totalIn - totalOut);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          showToast(
+            "Failed to load user data. Please check the server.",
+            "danger"
+          );
+        }
+      }
+
+      // Initial render (all transactions)
+      renderTransactions();
+
+      // Filter button
+      document.getElementById("filterBtn").addEventListener("click", () => {
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        renderTransactions(startDate, endDate);
+      });
+
+      // Clear filter button
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+        renderTransactions();
+      });
+
+      // Handle delete button
+      document
+        .getElementById("deleteUserBtn")
+        .addEventListener("click", async () => {
+          const params = new URLSearchParams(window.location.search);
+          const userEmail = params.get("user");
+
+          const usersRes = await fetch(`${API_BASE_URL}/users`);
+          const users = await usersRes.json();
+          const user = users.find((u) => u.email === userEmail);
+          if (!user) {
+    showToast("❌ User not found", "danger");
+    return;
+  }
+
+          showConfirmationModal(
+            `Are you sure you want to delete user "${user.name}"?`,
+            async () => {
+              try {
+                const response = await fetch(
+                  `${API_BASE_URL}/users/${user.email}`,
+                  {
+                    method: "DELETE",
+                  }
+                );
+
+                if (response.ok) {
+                  showToast(`✅ User "${user.name}" deleted successfully!`);
+                  window.location.href = "index.html";
+                } else {
+                  const result = await response.json();
+                  showToast("❌ " + result.message, "danger");
+                }
+              } catch (error) {
+                console.error("Error deleting user:", error);
+                showToast("❌ Failed to connect to server.", "danger");
+              }
+            }
+          );
+        });
+    </script>
+  </body>
+</html>
