@@ -383,7 +383,7 @@
       if (userObj && userObj.whatsapp) {
         const message = `Hi ${userObj.name},%0A%0AA new transaction was recorded:%0AType: ${
           currentTransactionType === "In" ? "Money Received" : "Money Sent"
-        }%0AAmount: ₹${selectedAmount}%0ADate: ${selectedDate}%0A%0ATotal Received: ₹${totalReceived}%0ATotal Sent: ₹${totalSent}%0ABalance: ₹${balance}%0A%0AThank you for using Money Transfer Tracker!`;
+        }%0AAmount: ₹${selectedAmount}%0ADate: ${selectedDate}%0APending: ₹${balance}%0A%0AThank you for using Money Transfer Tracker by Vijay's Software Solutions!`;
 
         const whatsappLink = `https://api.whatsapp.com/send?phone=${userObj.whatsapp.replace(
           /\D/g,
