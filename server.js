@@ -12,6 +12,19 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors());
+// Hardcoded login
+const USERNAME = "Shivam";
+const PASSWORD = "Shivam1234";
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  if (username === USERNAME && password === PASSWORD) {
+    return res.json({ success: true });
+  }
+  res.json({ success: false });
+});
+
 
 // ==== CONNECT TO MONGO ATLAS ====
 mongoose
@@ -291,14 +304,15 @@ app.delete("/users/:email", async (req, res) => {
   }
 });
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "loginPage.html"));
+});
 // ==== STATIC FILES ====
 app.use(express.static(path.join(__dirname, "public")));
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+
 
 // ==== START SERVER ====
-app.listen(port, "0.0.0.0", () => {
-  console.log(`🚀 Server running at http://0.0.0.0:${port}`);
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
   console.log(`🌐 Try http://192.168.56.1:${port} from another device`);
 });

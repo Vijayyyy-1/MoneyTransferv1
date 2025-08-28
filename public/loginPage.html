@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  </head>
+  <body
+    class="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
+  >
+    <div
+      class="bg-white/10 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 transform transition-all duration-500 hover:scale-[1.02]"
+    >
+      <!-- Logo / Header -->
+      <div class="text-center mb-8">
+        <div
+          class="mx-auto w-20 h-20 flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-pink-500 text-white rounded-2xl shadow-lg animate-pulse"
+        >
+          <i data-lucide="lock-keyhole" class="w-10 h-10"></i>
+        </div>
+        <h2 class="text-4xl font-extrabold text-white mt-4 drop-shadow-lg">
+          Welcome Back
+        </h2>
+        <p class="text-gray-200 text-sm mt-2">
+          Secure login to your <span class="font-semibold">MoneyTransfer</span> dashboard
+        </p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-6">
+        <!-- Username -->
+        <div class="relative">
+          <input
+            type="text"
+            id="username"
+            required
+            class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent"
+            placeholder="Username"
+          />
+          <label
+            for="username"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+            >Username</label
+          >
+        </div>
+
+        <!-- Password -->
+        <div class="relative">
+          <input
+            type="password"
+            id="password"
+            required
+            class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent pr-12"
+            placeholder="Password"
+          />
+          <label
+            for="password"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+            >Password</label
+          >
+          <!-- Eye Icon -->
+          <button
+            type="button"
+            id="togglePassword"
+            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-300"
+          >
+            <i data-lucide="eye"></i>
+          </button>
+        </div>
+
+        <!-- Remember me & Forgot -->
+        <div class="flex items-center justify-between text-sm text-gray-200">
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              class="h-4 w-4 text-indigo-500 border-gray-400 rounded focus:ring-indigo-500"
+            />
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="hover:underline hover:text-indigo-200 transition"
+            >Forgot password?</a
+          >
+        </div>
+
+        <!-- Login Button -->
+        <button
+          type="submit"
+          class="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:opacity-90 hover:scale-[1.02] transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400"
+        >
+          Sign In
+        </button>
+      </form>
+
+      <!-- Error Message -->
+      <p
+        id="message"
+        class="text-red-400 text-center text-sm mt-4 font-medium"
+      ></p>
+
+      <!-- Footer -->
+      <p class="text-center text-xs text-gray-300 mt-8">
+        Powered by <span class="font-semibold"> <b>Vijay's Software Solutions </b></span>
+      </p>
+    </div>
+
+    <script>
+      // Load lucide icons
+      lucide.createIcons();
+
+      // Toggle password visibility
+      const toggleBtn = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
+      toggleBtn.addEventListener("click", () => {
+        const type =
+          passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        toggleBtn.innerHTML =
+          type === "password"
+            ? '<i data-lucide="eye"></i>'
+            : '<i data-lucide="eye-off"></i>';
+        lucide.createIcons();
+      });
+
+      // Login logic
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.href = "/index.html";
+        } else {
+          document.getElementById("message").textContent =
+            "❌ Invalid username or password!";
+        }
+      });
+    </script>
+  </body>
+</html>
