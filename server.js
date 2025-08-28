@@ -292,7 +292,10 @@ app.delete("/users/:email", async (req, res) => {
 });
 
 // ==== STATIC FILES ====
-app.use(express.static(path.join(__dirname, "")));
+app.use(express.static(path.join(__dirname, "public")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // ==== START SERVER ====
 app.listen(port, "0.0.0.0", () => {
