@@ -210,9 +210,10 @@
       // Fetch users and transactions
       async function fetchDataAndRender() {
         try {
+          const owner = localStorage.getItem("loggedInOwner");
           const [usersRes, transactionsRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/users`),
-            fetch(`${API_BASE_URL}/transactions`),
+            fetch(`${API_BASE_URL}/users?owner=${owner}`),
+            fetch(`${API_BASE_URL}/transactions?owner=${owner}`),
           ]);
 
           const users = await usersRes.json();
@@ -230,22 +231,22 @@
       }
 
       function populateUserOptions(users) {
-  const defaultOption = `<option value="">-- Select User --</option>`;
+        const defaultOption = `<option value="">-- Select User --</option>`;
 
-  // Dashboard dropdown
-  const dashboardSelect = document.getElementById("dashboardSelect");
-  dashboardSelect.innerHTML = defaultOption;
-  users.forEach(u => {
-    dashboardSelect.innerHTML += `<option value="${u.email}">${u.name} (${u.email})</option>`;
-  });
+        // Dashboard dropdown
+        const dashboardSelect = document.getElementById("dashboardSelect");
+        dashboardSelect.innerHTML = defaultOption;
+        users.forEach((u) => {
+          dashboardSelect.innerHTML += `<option value="${u.email}">${u.name} (${u.email})</option>`;
+        });
 
-  // Form dropdown
-  const userSelectInput = document.getElementById("receiverOut");
-  userSelectInput.innerHTML = defaultOption;
-  users.forEach(u => {
-    userSelectInput.innerHTML += `<option value="${u.email}">${u.name} (${u.email})</option>`;
-  });
-}
+        // Form dropdown
+        const userSelectInput = document.getElementById("receiverOut");
+        userSelectInput.innerHTML = defaultOption;
+        users.forEach((u) => {
+          userSelectInput.innerHTML += `<option value="${u.email}">${u.name} (${u.email})</option>`;
+        });
+      }
 
       function renderTransactions(transactions) {
         const table = document.getElementById("transactionTable");
@@ -339,81 +340,90 @@
 
       // Form submission
       transactionForm.onsubmit = async (e) => {
-  e.preventDefault();
+        e.preventDefault();
 
-  const selectedEmail = userSelectInput.value;
-  const selectedAmount = amountInput.value;
-  // const selectedDate = dateInput.value;
-  const selectedDate = new Date().toISOString().split("T")[0]; 
+        const selectedEmail = userSelectInput.value;
+        const selectedAmount = amountInput.value;
+        // const selectedDate = dateInput.value;
+        const selectedDate = new Date().toISOString().split("T")[0];
 
+        const payload = {
+          type: currentTransactionType,
+          amount: selectedAmount,
+          user: selectedEmail,
+          date: selectedDate,
+          owner: localStorage.getItem("loggedInOwner"),
+        };
 
-  const payload = {
-    type: currentTransactionType,
-    amount: selectedAmount,
-    user: selectedEmail,
-    date: selectedDate,
-  };
+        try {
+          const response = await fetch(`${API_BASE_URL}/transactions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/transactions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+          if (response.ok) {
+            showToast(
+              `✅ ${
+                currentTransactionType === "In" ? "Money In" : "Money Out"
+              } recorded!`
+            );
 
-    if (response.ok) {
-      showToast(
-        `✅ ${currentTransactionType === "In" ? "Money In" : "Money Out"} recorded!`
-      );
+            // ✅ Refresh data first so summaries update
+            await fetchDataAndRender();
+            await updateTransactionSummary(selectedEmail);
 
-      // ✅ Refresh data first so summaries update
-      await fetchDataAndRender();
-      await updateTransactionSummary(selectedEmail);
+            // ✅ Now read the updated totals
+            const totalReceived = summaryReceived.textContent.replace("₹ ", "");
+            const totalSent = summarySent.textContent.replace("₹ ", "");
+            const balance = summaryBalance.textContent.replace("₹ ", "");
 
-      // ✅ Now read the updated totals
-      const totalReceived = summaryReceived.textContent.replace("₹ ", "");
-      const totalSent = summarySent.textContent.replace("₹ ", "");
-      const balance = summaryBalance.textContent.replace("₹ ", "");
+            // Reset form
+            transactionForm.reset();
 
-      // Reset form
-      transactionForm.reset();
+            // --- WhatsApp link ---
+            const userObj = allUsers.find((u) => u.email === selectedEmail);
+            if (userObj && userObj.whatsapp) {
+              const message = `Hi ${
+                userObj.name
+              },%0A%0AA new transaction was recorded:%0AType: ${
+                currentTransactionType === "In"
+                  ? "Money Received"
+                  : "Money Sent"
+              }%0AAmount: ₹${selectedAmount}%0ADate: ${selectedDate}%0APending: ₹${balance}%0A%0AThank you for using Money Transfer Tracker by Vijay's Software Solutions!`;
 
-      // --- WhatsApp link ---
-      const userObj = allUsers.find((u) => u.email === selectedEmail);
-      if (userObj && userObj.whatsapp) {
-        const message = `Hi ${userObj.name},%0A%0AA new transaction was recorded:%0AType: ${
-          currentTransactionType === "In" ? "Money Received" : "Money Sent"
-        }%0AAmount: ₹${selectedAmount}%0ADate: ${selectedDate}%0APending: ₹${balance}%0A%0AThank you for using Money Transfer Tracker by Vijay's Software Solutions!`;
-
-        const whatsappLink = `https://api.whatsapp.com/send?phone=${userObj.whatsapp.replace(
-          /\D/g,
-          ""
-        )}&text=${message}`;
-        window.open(whatsappLink, "_blank");
-      } else {
-        console.log(
-          "❌ WhatsApp number missing for user:",
-          userObj ? userObj.name : selectedEmail
-        );
-        showToast("❌ WhatsApp number not available for this user.", "danger");
-      }
-    } else {
-      showToast("❌ Failed to record transaction", "danger");
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("❌ Failed to connect to server", "danger");
-  }
-};
+              const whatsappLink = `https://api.whatsapp.com/send?phone=${userObj.whatsapp.replace(
+                /\D/g,
+                ""
+              )}&text=${message}`;
+              window.open(whatsappLink, "_blank");
+            } else {
+              console.log(
+                "❌ WhatsApp number missing for user:",
+                userObj ? userObj.name : selectedEmail
+              );
+              showToast(
+                "❌ WhatsApp number not available for this user.",
+                "danger"
+              );
+            }
+          } else {
+            showToast("❌ Failed to record transaction", "danger");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("❌ Failed to connect to server", "danger");
+        }
+      };
 
       function openUserDashboard() {
-  const email = document.getElementById("dashboardSelect").value;
-  if (!email) {
-    showToast("Please select a user first!", "warning");
-    return;
-  }
-  window.location.href = `user.html?user=${email}`;
-}
+        const email = document.getElementById("dashboardSelect").value;
+        if (!email) {
+          showToast("Please select a user first!", "warning");
+          return;
+        }
+        window.location.href = `user.html?user=${email}`;
+      }
 
       // Initialize
       document.addEventListener("DOMContentLoaded", () => {

@@ -178,8 +178,15 @@
       // Function to render transactions (with optional filter)
       async function renderTransactions(startDate = null, endDate = null) {
         try {
-          const usersRes = await fetch(`${API_BASE_URL}/users`);
-          const transactionsRes = await fetch(`${API_BASE_URL}/transactions`);
+          // const usersRes = await fetch(`${API_BASE_URL}/users`);
+          // const transactionsRes = await fetch(`${API_BASE_URL}/transactions`);
+          const loggedInOwner = localStorage.getItem("loggedInOwner");
+          const usersRes = await fetch(
+            `${API_BASE_URL}/users?owner=${loggedInOwner}`
+          );
+          const transactionsRes = await fetch(
+            `${API_BASE_URL}/transactions?owner=${loggedInOwner}`
+          );
 
           const users = await usersRes.json();
           const transactions = await transactionsRes.json();
@@ -187,23 +194,24 @@
           const params = new URLSearchParams(window.location.search);
           const userEmail = params.get("user");
 
-          
-if (!userEmail) {
-  document.getElementById("userTitle").innerText = "User not found!";
-  document.getElementById("deleteUserBtn").style.display = "none";
-  document.getElementById("userTransactions").innerHTML =
-    `<tr><td colspan="3">User not found.</td></tr>`;
-  return;
-}
-const user = users.find((u) => u.email === userEmail);
+          if (!userEmail) {
+            document.getElementById("userTitle").innerText = "User not found!";
+            document.getElementById("deleteUserBtn").style.display = "none";
+            document.getElementById(
+              "userTransactions"
+            ).innerHTML = `<tr><td colspan="3">User not found.</td></tr>`;
+            return;
+          }
+          const user = users.find((u) => u.email === userEmail);
 
-if (!user) {
-  document.getElementById("userTitle").innerText = "User not found!";
-  document.getElementById("deleteUserBtn").style.display = "none";
-  document.getElementById("userTransactions").innerHTML =
-    `<tr><td colspan="3">User not found.</td></tr>`;
-  return;
-}
+          if (!user) {
+            document.getElementById("userTitle").innerText = "User not found!";
+            document.getElementById("deleteUserBtn").style.display = "none";
+            document.getElementById(
+              "userTransactions"
+            ).innerHTML = `<tr><td colspan="3">User not found.</td></tr>`;
+            return;
+          }
 
           // const user = users[userIndex];
           document.getElementById("userTitle").innerText =
@@ -212,30 +220,29 @@ if (!user) {
           let totalIn = 0,
             totalOut = 0;
 
-const userRows = transactions
-  .filter((t) => t.user === user.email)
-  .filter((t) => {
-    if (!startDate && !endDate) return true;
-    const txDate = new Date(t.date);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
-    if (start && txDate < start) return false;
-    if (end && txDate > end) return false;
-    return true;
-  })
-  .map((t) => {
-    if (t.type === "In") totalIn += parseFloat(t.amount);
-    if (t.type === "Out") totalOut += parseFloat(t.amount);
-    return `<tr>
+          const userRows = transactions
+            .filter((t) => t.user === user.email)
+            .filter((t) => {
+              if (!startDate && !endDate) return true;
+              const txDate = new Date(t.date);
+              const start = startDate ? new Date(startDate) : null;
+              const end = endDate ? new Date(endDate) : null;
+              if (start && txDate < start) return false;
+              if (end && txDate > end) return false;
+              return true;
+            })
+            .map((t) => {
+              if (t.type === "In") totalIn += parseFloat(t.amount);
+              if (t.type === "Out") totalOut += parseFloat(t.amount);
+              return `<tr>
       <td class="${
         t.type === "In" ? "text-success fw-bold" : "text-danger fw-bold"
       }">${t.type === "In" ? "Money Received" : "Money Sent"}</td>
       <td>₹ ${t.amount}</td>
       <td>${t.date}</td>
     </tr>`;
-  })
-  .join("");
-
+            })
+            .join("");
 
           // Update transactions table
           document.getElementById("userTransactions").innerHTML =
@@ -283,9 +290,9 @@ const userRows = transactions
           const users = await usersRes.json();
           const user = users.find((u) => u.email === userEmail);
           if (!user) {
-    showToast("❌ User not found", "danger");
-    return;
-  }
+            showToast("❌ User not found", "danger");
+            return;
+          }
 
           showConfirmationModal(
             `Are you sure you want to delete user "${user.name}"?`,

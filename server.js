@@ -13,16 +13,31 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 // Hardcoded login
-const USERNAME = "Shivam";
-const PASSWORD = "Shivam1234";
+// const USERNAME = "Shivam";
+// const PASSWORD = "Shivam1234";
+// Hardcoded shop owners
+const SHOP_OWNERS = [
+  { username: "Shivam", password: "Shivam1234" },
+  { username: "Vijay", password: "Vijay73788" },
+];
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  if (username === USERNAME && password === PASSWORD) {
-    return res.json({ success: true });
+  console.log("📝 Login attempt:", { username, password });
+
+  // Trim spaces just in case
+  const owner = SHOP_OWNERS.find(
+    (o) => o.username === username.trim() && o.password === password.trim()
+  );
+
+  if (owner) {
+    console.log("✅ Login successful for:", owner.username);
+    return res.json({ success: true, owner: owner.username });
   }
-  res.json({ success: false });
+
+  console.log("❌ Invalid login for:", username);
+  res.json({ success: false, message: "Invalid username or password!" });
 });
 
 
@@ -40,6 +55,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
   whatsapp: String,
+  owner: String, // shop owner
 });
 
 const transactionSchema = new mongoose.Schema({
@@ -47,6 +63,7 @@ const transactionSchema = new mongoose.Schema({
   type: String, // "in" or "out"
   amount: Number,
   date: { type: Date, default: Date.now },
+  owner: String, // shop owner
 });
 
 const User = mongoose.model("User", userSchema);
@@ -175,7 +192,7 @@ async function sendEmail(to, subject, html) {
 // Get all users
 app.get("/users", async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({owner:req.query.owner});
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -194,7 +211,7 @@ app.post("/users", async (req, res) => {
         .json({ message: "User with this email already exists." });
     }
 
-    const newUser = new User({ name, email, whatsapp });
+    const newUser = new User({ name, email, whatsapp,owner:req.body.owner });
     await newUser.save();
 
     // send welcome email
@@ -213,7 +230,7 @@ app.post("/users", async (req, res) => {
 // Get all transactions
 app.get("/transactions", async (req, res) => {
   try {
-    const transactions = await Transaction.find();
+    const transactions = await Transaction.find({owner:req.query.owner});
     res.status(200).json(transactions);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -236,6 +253,7 @@ app.post("/transactions", async (req, res) => {
       user: userEmail,
       type,
       amount,
+      owner: req.body.owner,
     });
     await newTransaction.save();
 
