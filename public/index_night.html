@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Money Transfer Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-dark-primary: #1a1a2e;
+            --bg-dark-secondary: #16213e;
+            --primary-accent: #0f3460;
+            --electric-blue: #537fe7;
+            --text-light: #e4e6eb;
+            --text-muted: #b0b3b8;
+            --card-bg: rgba(22, 33, 62, 0.6);
+            --card-border: rgba(83, 127, 231, 0.2);
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background-color: var(--bg-dark-primary);
+            background-image: radial-gradient(circle at 1% 1%, var(--primary-accent), var(--bg-dark-primary) 40%);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .header-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #a7b5ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: rgba(83, 127, 231, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .form-control, .form-select {
+            background-color: var(--bg-dark-secondary);
+            color: var(--text-light);
+            border: 1px solid var(--primary-accent);
+        }
+        .input-group-text {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--primary-accent);
+            border-right: none;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-dark-secondary);
+            color: var(--text-light);
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 0 0.25rem rgba(83, 127, 231, 0.25);
+        }
+        .form-control:focus + .input-group-text, 
+        .form-select:focus + .input-group-text {
+             border-color: var(--electric-blue);
+        }
+        .btn.btn-outline-primary {
+            border-color: var(--electric-blue);
+            color: var(--electric-blue);
+        }
+        .btn.btn-outline-primary:hover {
+            background-color: var(--electric-blue);
+            color: white;
+        }
+
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-border-color: var(--primary-accent);
+            --bs-table-color: var(--text-light);
+            --bs-table-striped-bg: rgba(83, 127, 231, 0.05);
+            --bs-table-hover-bg: rgba(83, 127, 231, 0.1);
+        }
+        .table thead th {
+            color: var(--electric-blue);
+            font-weight: 600;
+        }
+        .table tbody tr {
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        #transactionUserSummary .card {
+            background: var(--bg-dark-secondary);
+        }
+        #transactionUserSummary .card:hover {
+             transform: none;
+        }
+        #transactionUserSummary .card-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        #transactionUserSummary .card-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header class="header-glass sticky-top py-3 mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0 d-flex align-items-center gap-2 gradient-text">
+                <i class="bi bi-phone-stack"></i>
+                <span class="d-none d-sm-inline">Money Transfer Tracker</span>
+            </h1>
+            <div class="d-flex gap-2">
+                <a href="index.html" class="btn btn-outline-light fw-bold">🌞 Day Mode</a>
+                <a href="register.html" class="btn btn-outline-warning fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-person-plus-fill"></i><span class="d-none d-md-inline">Register User</span>
+                </a>
+                <button id="logoutBtn" class="btn btn-outline-danger fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-box-arrow-right"></i><span class="d-none d-md-inline">Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="row">
+            <div class="col-lg-5 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 text-info mb-3"><i class="bi bi-wallet2 me-2"></i>New Transaction</h2>
+
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <button type="button" id="btnSend" class="btn btn-danger w-50">
+                                <i class="bi bi-arrow-up-circle me-1"></i> Send
+                            </button>
+                            <button type="button" id="btnReceive" class="btn btn-success w-50">
+                               <i class="bi bi-arrow-down-circle me-1"></i> Receive
+                            </button>
+                        </div>
+
+                        <form id="transactionForm">
+                            <div class="mb-3">
+                                <label for="amountOut" class="form-label">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="any" class="form-control" id="amountOut" placeholder="0.00" required />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="receiverOut" class="form-label" id="userLabel">Receiver</label>
+                                <select id="receiverOut" class="form-select" required></select>
+                            </div>
+
+                            <div class="row g-2 mb-3" id="transactionUserSummary" style="display: none;">
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body text-center p-2">
+                                            <h6 class="card-title mb-1 d-flex align-items-center justify-content-center gap-2"><i class="bi bi-box-arrow-up"></i>Sent</h6>
+                                            <p class="card-text text-danger mb-0" id="summarySent">₹ 0.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body text-center p-2">
+                                            <h6 class="card-title mb-1 d-flex align-items-center justify-content-center gap-2"><i class="bi bi-box-arrow-in-down"></i>Received</h6>
+                                            <p class="card-text text-success mb-0" id="summaryReceived">₹ 0.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body text-center p-2">
+                                            <h6 class="card-title mb-1 d-flex align-items-center justify-content-center gap-2"><i class="bi bi-wallet"></i>Balance</h6>
+                                            <p class="card-text text-info mb-0" id="summaryBalance">₹ 0.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submitButton" class="btn btn-danger w-100 fw-bold py-2 d-flex align-items-center justify-content-center" disabled>
+                                <span class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                                <span class="button-text">Send Money</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                             <h2 class="h5 text-info mb-0"><i class="bi bi-clock-history me-2"></i>Transaction History</h2>
+                             
+                             <div class="input-group w-auto">
+                                <select id="dashboardSelect" class="form-select">
+                                    <option value="">-- Select User --</option>
+                                </select>
+                                <button class="btn btn-outline-primary" onclick="openUserDashboard()">
+                                    <i class="bi bi-person-badge"></i> Open
+                                </button>
+                             </div>
+                        </div>
+                        <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+                            <table class="table table-striped table-hover align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>User</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- YOUR JAVASCRIPT IS UNCHANGED AND REMAINS HERE ---
+
+        const API_BASE_URL = window.location.origin;
+        const toastEl = document.getElementById("liveToast");
+        const toastBody = document.getElementById("toastMessage");
+        const toast = new bootstrap.Toast(toastEl);
+
+        function showToast(message, type = "success") {
+            toastEl.className = `toast align-items-center text-bg-${type} border-0`;
+            toastBody.textContent = message;
+            toast.show();
+        }
+
+        const btnSend = document.getElementById("btnSend");
+        const btnReceive = document.getElementById("btnReceive");
+        const transactionForm = document.getElementById("transactionForm");
+        const amountInput = document.getElementById("amountOut");
+        const userSelectInput = document.getElementById("receiverOut");
+        const userLabel = document.getElementById("userLabel");
+        const submitButton = document.getElementById("submitButton");
+        const summaryContainer = document.getElementById("transactionUserSummary");
+        const summarySent = document.getElementById("summarySent");
+        const summaryReceived = document.getElementById("summaryReceived");
+        const summaryBalance = document.getElementById("summaryBalance");
+        const dashboardSelect = document.getElementById("dashboardSelect");
+
+        let currentTransactionType = "Out";
+        let allTransactions = [];
+        let allUsers = [];
+
+        async function fetchDataAndRender() {
+            try {
+                setLoadingState(true, 'Loading...');
+                const owner = localStorage.getItem("loggedInOwner");
+                const [usersRes, transactionsRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/users?owner=${owner}`),
+                    fetch(`${API_BASE_URL}/transactions?owner=${owner}`),
+                ]);
+
+                allUsers = await usersRes.json();
+                allTransactions = await transactionsRes.json();
+
+                populateUserOptions(allUsers);
+                renderTransactions(allTransactions); // Initial render with all transactions
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                showToast("Failed to load data. Please check the server.", "danger");
+            } finally {
+                setLoadingState(false);
+            }
+        }
+        
+        function setLoadingState(isLoading, text = null) {
+            const buttonText = submitButton.querySelector('.button-text');
+            const spinner = submitButton.querySelector('.spinner-border');
+            
+            submitButton.disabled = isLoading;
+            if (isLoading) {
+                spinner.style.display = 'inline-block';
+                buttonText.textContent = text || 'Processing...';
+            } else {
+                spinner.style.display = 'none';
+                updateFormUI();
+            }
+        }
+
+        function populateUserOptions(users) {
+            const defaultOption = `<option value="">-- Select User --</option>`;
+            const allUsersOption = `<option value="">-- View All Users --</option>`;
+            
+            const userOptionsHTML = users.map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
+
+            // dashboardSelect dropdown now only has "Select User" for clarity
+            dashboardSelect.innerHTML = defaultOption + userOptionsHTML; 
+            userSelectInput.innerHTML = defaultOption + userOptionsHTML;
+        }
+
+        function renderTransactions(transactions) {
+            const table = document.getElementById("transactionTable");
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (transactions.length === 0) {
+                table.innerHTML = `<tr><td colspan="4" class="text-center text-muted p-5"><i class="bi bi-archive fs-2"></i><br/>No transactions yet.</td></tr>`;
+                return;
+            }
+
+            table.innerHTML = transactions.map(t => {
+                const isOut = t.type === "Out";
+                const badgeClass = isOut ? 'bg-danger-subtle text-danger-emphasis' : 'bg-success-subtle text-success-emphasis';
+                const icon = isOut ? '<i class="bi bi-arrow-up-circle me-2"></i>' : '<i class="bi bi-arrow-down-circle me-2"></i>';
+                const userName = allUsers.find(u => u.email === t.user)?.name || t.user;
+
+                return `<tr>
+                    <td><span class="badge ${badgeClass} p-2 d-flex align-items-center">${icon} ${t.type}</span></td>
+                    <td class="fw-bold">₹ ${parseFloat(t.amount).toLocaleString('en-IN')}</td>
+                    <td>${userName}</td>
+                    <td>${new Date(t.date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                </tr>`;
+            }).join("");
+        }
+        
+        // This function now just redirects, the filtering is separate.
+        function openUserDashboard() {
+            const email = document.getElementById("dashboardSelect").value;
+            if (!email) {
+                showToast("Please select a user first!", "warning");
+                return;
+            }
+            window.location.href = `user.html?user=${email}`;
+        }
+
+        function updateFormUI() {
+            const buttonText = submitButton.querySelector('.button-text');
+            if (currentTransactionType === "Out") {
+                btnSend.classList.add("btn-danger");
+                btnSend.classList.remove("btn-outline-secondary");
+                btnReceive.classList.remove("btn-success");
+                btnReceive.classList.add("btn-outline-secondary");
+                userLabel.textContent = "Receiver";
+                buttonText.textContent = "Send Money";
+                submitButton.className = "btn btn-danger w-100 fw-bold py-2 d-flex align-items-center justify-content-center";
+            } else {
+                btnReceive.classList.add("btn-success");
+                btnReceive.classList.remove("btn-outline-secondary");
+                btnSend.classList.remove("btn-danger");
+                btnSend.classList.add("btn-outline-secondary");
+                userLabel.textContent = "Sender";
+                buttonText.textContent = "Money Received";
+                submitButton.className = "btn btn-success w-100 fw-bold py-2 d-flex align-items-center justify-content-center";
+            }
+        }
+
+        btnSend.onclick = () => { currentTransactionType = "Out"; updateFormUI(); };
+        btnReceive.onclick = () => { currentTransactionType = "In"; updateFormUI(); };
+
+        function updateTransactionSummary(userEmail) {
+            if (!userEmail) { summaryContainer.style.display = "none"; return; }
+            let totalSent = 0, totalReceived = 0;
+            allTransactions.forEach(t => {
+                if (t.user === userEmail) {
+                    if (t.type === "Out") totalSent += parseFloat(t.amount);
+                    else if (t.type === "In") totalReceived += parseFloat(t.amount);
+                }
+            });
+            const balance = totalReceived - totalSent;
+            summarySent.textContent = `₹ ${totalSent.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            summaryReceived.textContent = `₹ ${totalReceived.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            summaryBalance.textContent = `₹ ${balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+            summaryContainer.style.display = "flex";
+        }
+
+        userSelectInput.addEventListener("change", () => updateTransactionSummary(userSelectInput.value));
+
+        transactionForm.onsubmit = async (e) => {
+            e.preventDefault();
+            setLoadingState(true);
+
+            const selectedEmail = userSelectInput.value;
+            const payload = {
+                type: currentTransactionType,
+                amount: amountInput.value,
+                user: selectedEmail,
+                date: new Date().toISOString().split("T")[0],
+                owner: localStorage.getItem("loggedInOwner"),
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/transactions`, {
+                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+                });
+                if (!response.ok) throw new Error("Failed to record transaction");
+
+                showToast(`✅ ${payload.type === "In" ? "Money In" : "Money Out"} recorded!`);
+                
+                await fetchDataAndRender();
+                updateTransactionSummary(selectedEmail);
+
+                amountInput.value = '';
+                amountInput.focus();
+                
+                const userObj = allUsers.find((u) => u.email === selectedEmail);
+                if (userObj && userObj.whatsapp) {
+                    const balanceText = summaryBalance.textContent.replace("₹ ", "").replace(/,/g, '');
+                    const message = `Hi ${userObj.name},%0A%0AA new transaction was recorded:%0AType: ${payload.type === "In" ? "Money Received" : "Money Sent"}%0AAmount: ₹${parseFloat(payload.amount).toLocaleString('en-IN')}%0ADate: ${new Date(payload.date).toLocaleString('en-GB')}%0A*Pending Balance: ₹${parseFloat(balanceText).toLocaleString('en-IN')}*%0A%0AThank you!`;
+                    const whatsappLink = `https://api.whatsapp.com/send?phone=${userObj.whatsapp.replace(/\D/g,"")}&text=${message}`;
+                    window.open(whatsappLink, "_blank");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("❌ Failed to connect to server", "danger");
+            } finally {
+                setLoadingState(false);
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!localStorage.getItem("loggedInOwner")) {
+                window.location.href = "loginPage.html";
+            } else {
+                fetchDataAndRender();
+            }
+        });
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            localStorage.removeItem("loggedInOwner");
+            window.location.href = "loginPage.html";
+        });
+        dashboardSelect.addEventListener('change', () => {
+    const selectedUserEmail = dashboardSelect.value;
+    
+    if (selectedUserEmail) {
+        // If a specific user is selected, filter the transactions
+        const filteredTransactions = allTransactions.filter(t => t.user === selectedUserEmail);
+        renderTransactions(filteredTransactions);
+    } else {
+        // If "-- Select User --" is chosen, show all transactions
+        renderTransactions(allTransactions);
+    }
+});
+    </script>
+</body>
+</html>
