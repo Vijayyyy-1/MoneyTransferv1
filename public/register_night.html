@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Register User</title>
+    <title>Register User - Night Mode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
@@ -10,24 +10,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
-        /* THEME CHANGE: New Soft Green Palette */
         :root {
-            --primary-color: #28a745; /* Bootstrap's success green */
-            --secondary-color: #20c997; /* A lighter, complementary teal */
-            --body-bg: #fdfdfd; /* A warmer off-white */
+            --bg-dark-primary: #12121c;
+            --bg-dark-secondary: #16213e;
+            --primary-accent: #0f3460;
+            --electric-blue: #537fe7;
+            --text-light: #e4e6eb;
+            --text-muted: #b0b3b8;
+            --card-bg: rgba(22, 33, 62, 0.7);
         }
 
         body {
             font-family: "Poppins", sans-serif;
-            background-color: var(--body-bg);
-            color: #212529;
+            background-color: var(--bg-dark-primary);
+            background-image: radial-gradient(circle at 1% 1%, var(--primary-accent), var(--bg-dark-primary) 40%);
+            color: var(--text-light);
         }
 
         .header-section {
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            color: white;
             padding: 3rem 1rem 6rem 1rem;
             text-align: center;
+        }
+        
+        .header-section .gradient-text {
+             background: linear-gradient(90deg, #a7b5ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .main-container {
@@ -35,9 +43,29 @@
         }
 
         .card {
-            border: none;
+            position: relative;
+            border: 1px solid transparent;
             border-radius: 1rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* Softer shadow */
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background-clip: padding-box;
+            animation: slideUpFadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes slideUpFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -1px;
+            border-radius: inherit;
+            background: linear-gradient(120deg, var(--electric-blue), var(--primary-accent), var(--electric-blue));
         }
 
         .card-body {
@@ -45,95 +73,125 @@
         }
 
         .form-label {
-            font-weight: 600;
-            color: #495057;
+            font-weight: 500;
+            color: var(--text-muted);
         }
         
         .form-control {
-            padding: 0.9rem 1rem 0.9rem 2.75rem;
+            padding: 0.9rem 1rem 0.9rem 3rem; /* Adjusted padding for icon wrapper */
             border-radius: 0.5rem;
-            border: 1px solid #ced4da;
+            background-color: var(--bg-dark-secondary);
+            color: var(--text-light);
+            border: 1px solid var(--primary-accent);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            font-size: 1rem;
         }
 
-        /* THEME CHANGE: Focus color updated to green */
         .form-control:focus {
-            border-color: #52bea1;
-            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+            background-color: var(--bg-dark-secondary);
+            color: var(--text-light);
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 0 0.25rem rgba(83, 127, 231, 0.25);
         }
         
         .input-wrapper {
             position: relative;
         }
-        .input-wrapper .form-icon {
+
+        /* FIX: Robust icon alignment using a Flexbox wrapper */
+        .input-icon-wrapper {
             position: absolute;
-            top: 50%;
-            left: 1rem;
-            transform: translateY(-50%);
-            color: #adb5bd;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             pointer-events: none;
-            font-size: 1.1rem;
-        }
-        .form-control:focus ~ .form-icon {
-            color: var(--primary-color);
         }
 
-        /* THEME CHANGE: Primary button is now green */
+        .form-icon {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+
+        .form-control:focus + .input-icon-wrapper .form-icon {
+            color: var(--electric-blue);
+        }
+        
+        .form-text {
+            color: var(--text-muted);
+        }
+
         .btn-primary {
-            padding: 0.8rem 1.5rem;
-            font-weight: 600;
-            border-radius: 0.5rem;
-            width: 100%;
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background-color: var(--electric-blue);
+            border-color: var(--electric-blue);
+            transition: all 0.3s ease;
         }
          .btn-primary:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
+            opacity: 1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(83, 127, 231, 0.3);
+        }
+        
+        .btn-outline-light {
+             width: 100%;
+             padding: 0.8rem 1.5rem;
+             font-weight: 600;
+             border-radius: 0.5rem;
         }
     </style>
 </head>
 <body>
     <header class="header-section">
-        <h1 class="h3">Register New User</h1>
+        <h1 class="h3 gradient-text d-inline-flex align-items-center gap-2">
+           <i class="bi bi-person-plus-fill"></i> Register New User
+        </h1>
     </header>
 
     <div class="container main-container" style="max-width: 550px;">
         <div class="card">
             <div class="card-body">
-                <form id="registerForm" class="text-center">
+                <h2 class="text-center fw-bold mb-4">Create Your Account</h2>
+                <form id="registerForm">
                     <div class="text-start mb-3">
                         <label for="userName" class="form-label">Name</label>
                         <div class="input-wrapper">
                             <input type="text" id="userName" class="form-control" required />
-                            <i class="bi bi-person form-icon"></i>
+                            <span class="input-icon-wrapper">
+                                <i class="bi bi-person form-icon"></i>
+                            </span>
                         </div>
                     </div>
                     <div class="text-start mb-3">
                         <label for="userEmail" class="form-label">Email</label>
                         <div class="input-wrapper">
                             <input type="email" id="userEmail" class="form-control" required />
-                            <i class="bi bi-envelope form-icon"></i>
+                             <span class="input-icon-wrapper">
+                                <i class="bi bi-envelope form-icon"></i>
+                            </span>
                         </div>
                     </div>
                     <div class="text-start mb-4">
                         <label for="userWhatsapp" class="form-label">WhatsApp Number</label>
                         <div class="input-wrapper">
                             <input type="tel" id="userWhatsapp" class="form-control" placeholder="+91XXXXXXXXXX" pattern="^\+?[0-9]{10,15}$" required />
-                            <i class="bi bi-whatsapp form-icon"></i>
+                            <span class="input-icon-wrapper">
+                               <i class="bi bi-whatsapp form-icon"></i>
+                            </span>
                         </div>
                         <div class="form-text mt-2 text-start">
                             Include country code (e.g., +91).
                         </div>
                     </div>
                     
-                    <div class="d-grid gap-2 mt-4">
+                    <div class="d-grid gap-3 mt-4">
                         <button type="submit" id="registerButton" class="btn btn-primary d-flex align-items-center justify-content-center">
                            <span class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
                            <span class="button-text">Register</span>
                         </button>
-                        <a href="index.html" class="btn btn-link text-secondary">Back to Dashboard</a>
+                        <a href="index_night.html" class="btn btn-outline-light">Back to Dashboard</a>
                     </div>
                 </form>
             </div>
@@ -151,7 +209,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Your JavaScript logic remains unchanged.
         const loggedInOwner = localStorage.getItem("loggedInOwner");
         const API_BASE_URL = window.location.origin;
 
