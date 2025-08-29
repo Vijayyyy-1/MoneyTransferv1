@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Owner Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  </head>
+  <body
+    class="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
+  >
+    <div
+      class="bg-white/10 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 transform transition-all duration-500 hover:scale-[1.02]"
+    >
+      <div class="text-center mb-8">
+        <div
+          class="mx-auto w-20 h-20 flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-pink-500 text-white rounded-2xl shadow-lg animate-pulse"
+        >
+          <i data-lucide="user-plus" class="w-10 h-10"></i>
+        </div>
+        <h2 class="text-4xl font-extrabold text-white mt-4 drop-shadow-lg">
+          Create Owner Account
+        </h2>
+        <p class="text-gray-200 text-sm mt-2">
+          Sign up as a <span class="font-semibold">MoneyTransfer</span> shop
+          owner
+        </p>
+      </div>
+
+      <form id="signupForm" class="space-y-6">
+        <div class="relative">
+          <input
+            type="text"
+            id="username"
+            required
+            minlength="3"
+            class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent"
+            placeholder="Username"
+          />
+          <label
+            for="username"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+            >Username</label
+          >
+        </div>
+
+        <div class="relative">
+          <input
+            type="password"
+            id="password"
+            required
+            minlength="8"
+            class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent pr-12"
+            placeholder="Password"
+          />
+          <label
+            for="password"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+            >Password</label
+          >
+          <button
+            type="button"
+            id="togglePassword"
+            aria-label="Show password"
+            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-300"
+          >
+            <i data-lucide="eye"></i>
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          id="signupButton"
+          class="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:opacity-90 hover:scale-[1.02] transform transition-all duration-300 flex items-center justify-center"
+        >
+          Sign Up
+        </button>
+      </form>
+
+      <p
+        id="message"
+        class="text-red-400 text-center text-sm mt-4 font-medium"
+        aria-live="polite"
+      ></p>
+
+      <p class="text-center text-xs text-gray-300 mt-8">
+        Already have an account?
+        <a
+          href="loginPage.html"
+          class="text-indigo-400 font-semibold hover:underline"
+          >Sign in</a
+        >
+      </p>
+    </div>
+
+    <script>
+      lucide.createIcons();
+
+      const signupForm = document.getElementById("signupForm");
+      const toggleBtn = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
+      const messageEl = document.getElementById("message");
+
+      // Toggle password visibility
+      toggleBtn.addEventListener("click", () => {
+        const isPassword = passwordInput.getAttribute("type") === "password";
+        passwordInput.setAttribute("type", isPassword ? "text" : "password");
+        toggleBtn.setAttribute(
+          "aria-label",
+          isPassword ? "Hide password" : "Show password"
+        );
+        toggleBtn.innerHTML = isPassword
+          ? '<i data-lucide="eye-off"></i>'
+          : '<i data-lucide="eye"></i>';
+        lucide.createIcons();
+      });
+
+      // Signup form submit
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        messageEl.textContent = "";
+
+        const payload = {
+          username: document.getElementById("username").value.trim(),
+          password: document.getElementById("password").value.trim(),
+        };
+
+        try {
+          const res = await fetch("/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            messageEl.textContent =
+              "✅ Owner account created! Redirecting to login...";
+            messageEl.classList.remove("text-red-400");
+            messageEl.classList.add("text-green-300");
+            setTimeout(() => (window.location.href = "loginPage.html"), 1500);
+          } else {
+            throw new Error(data.message || "Signup failed");
+          }
+        } catch (err) {
+          messageEl.textContent = err.message;
+        }
+      });
+    </script>
+  </body>
+</html>

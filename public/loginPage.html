@@ -6,18 +6,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   </head>
-  <body class="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
-    <div class="bg-white/10 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 transform transition-all duration-500 hover:scale-[1.02]">
-      
+  <body
+    class="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
+  >
+    <div
+      class="bg-white/10 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 transform transition-all duration-500 hover:scale-[1.02]"
+    >
       <div class="text-center mb-8">
-        <div class="mx-auto w-20 h-20 flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-pink-500 text-white rounded-2xl shadow-lg animate-pulse">
+        <div
+          class="mx-auto w-20 h-20 flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-pink-500 text-white rounded-2xl shadow-lg animate-pulse"
+        >
           <i data-lucide="lock-keyhole" class="w-10 h-10"></i>
         </div>
         <h2 class="text-4xl font-extrabold text-white mt-4 drop-shadow-lg">
           Welcome Back
         </h2>
         <p class="text-gray-200 text-sm mt-2">
-          Secure login to your <span class="font-semibold">MoneyTransfer</span> dashboard
+          Secure login to your
+          <span class="font-semibold">MoneyTransfer</span> dashboard
         </p>
       </div>
 
@@ -33,7 +39,10 @@
             class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent invalid:border-red-500 focus:invalid:ring-red-500"
             placeholder="Username"
           />
-          <label for="username" class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200">
+          <label
+            for="username"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+          >
             Username
           </label>
         </div>
@@ -48,17 +57,28 @@
             class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent pr-12 invalid:border-red-500 focus:invalid:ring-red-500"
             placeholder="Password"
           />
-          <label for="password" class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200">
+          <label
+            for="password"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+          >
             Password
           </label>
-          <button type="button" id="togglePassword" aria-label="Show password" class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-300">
+          <button
+            type="button"
+            id="togglePassword"
+            aria-label="Show password"
+            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-300"
+          >
             <i data-lucide="eye"></i>
           </button>
         </div>
 
         <div class="flex items-center justify-between text-sm text-gray-200">
           <label class="flex items-center space-x-2 cursor-pointer">
-            <input type="checkbox" class="h-4 w-4 text-indigo-500 border-gray-400 rounded focus:ring-indigo-500"/>
+            <input
+              type="checkbox"
+              class="h-4 w-4 text-indigo-500 border-gray-400 rounded focus:ring-indigo-500"
+            />
             <span>Remember me</span>
           </label>
           <a href="#" class="hover:underline hover:text-indigo-200 transition">
@@ -66,19 +86,54 @@
           </a>
         </div>
 
-        <button type="submit" id="loginButton" class="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:opacity-90 hover:scale-[1.02] transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed">
+        <button
+          type="submit"
+          id="loginButton"
+          class="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:opacity-90 hover:scale-[1.02] transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+        >
           <span id="buttonText">Sign In</span>
-          <svg id="spinner" aria-hidden="true" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            id="spinner"
+            aria-hidden="true"
+            class="animate-spin ml-2 h-5 w-5 text-white hidden"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
         </button>
       </form>
 
-      <p id="message" class="text-red-400 text-center text-sm mt-4 font-medium" aria-live="polite"></p>
+      <p
+        id="message"
+        class="text-red-400 text-center text-sm mt-4 font-medium"
+        aria-live="polite"
+      ></p>
 
       <p class="text-center text-xs text-gray-300 mt-8">
-        Powered by <span class="font-semibold"><b>Vijay's Software Solutions</b></span>
+        Powered by
+        <span class="font-semibold"><b>Vijay's Software Solutions</b></span>
+      </p>
+      <p class="text-center text-gray-300 text-sm mt-4">
+        Don't have an account?
+        <a
+          href="signup.html"
+          class="text-indigo-400 font-semibold hover:underline"
+          >Create one</a
+        >
       </p>
     </div>
 
@@ -100,16 +155,21 @@
       function clearMessage() {
         messageEl.textContent = "";
       }
-      usernameInput.addEventListener('input', clearMessage);
-      passwordInput.addEventListener('input', clearMessage);
-      
+      usernameInput.addEventListener("input", clearMessage);
+      passwordInput.addEventListener("input", clearMessage);
+
       // --- Toggle password visibility ---
       toggleBtn.addEventListener("click", () => {
         const isPassword = passwordInput.getAttribute("type") === "password";
         passwordInput.setAttribute("type", isPassword ? "text" : "password");
-        
-        toggleBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-        toggleBtn.innerHTML = isPassword ? '<i data-lucide="eye-off"></i>' : '<i data-lucide="eye"></i>';
+
+        toggleBtn.setAttribute(
+          "aria-label",
+          isPassword ? "Hide password" : "Show password"
+        );
+        toggleBtn.innerHTML = isPassword
+          ? '<i data-lucide="eye-off"></i>'
+          : '<i data-lucide="eye"></i>';
         lucide.createIcons();
       });
 
@@ -121,46 +181,50 @@
         // Show loading state
         loginButton.disabled = true;
         buttonText.textContent = "Signing In...";
-        spinner.classList.remove('hidden');
+        spinner.classList.remove("hidden");
 
         const username = usernameInput.value;
         const password = passwordInput.value;
-        
+
         try {
-            const res = await fetch("/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ username, password }),
-            });
+          const res = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
 
-            if (!res.ok) {
-                // Handle HTTP errors like 401 Unauthorized or 500 Internal Server Error
-                const errorData = await res.json().catch(() => ({ message: 'Invalid response from server' }));
-                throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
-            }
+          if (!res.ok) {
+            // Handle HTTP errors like 401 Unauthorized or 500 Internal Server Error
+            const errorData = await res
+              .json()
+              .catch(() => ({ message: "Invalid response from server" }));
+            throw new Error(
+              errorData.message || `HTTP error! Status: ${res.status}`
+            );
+          }
 
-            const data = await res.json();
+          const data = await res.json();
 
-            if (data.success) {
-              localStorage.setItem("loggedInOwner", data.owner);
-              messageEl.textContent = "✅ Login successful! Redirecting...";
-              messageEl.classList.remove('text-red-400');
-              messageEl.classList.add('text-green-300');
-              window.setTimeout(() => {
-                  window.location.href = "/index.html";
-              }, 1000);
-            } else {
-              throw new Error(data.message || "Invalid username or password!");
-            }
+          if (data.success) {
+            localStorage.setItem("loggedInOwner", data.owner);
+            messageEl.textContent = "✅ Login successful! Redirecting...";
+            messageEl.classList.remove("text-red-400");
+            messageEl.classList.add("text-green-300");
+            window.setTimeout(() => {
+              window.location.href = "/index.html";
+            }, 1000);
+          } else {
+            throw new Error(data.message || "Invalid username or password!");
+          }
         } catch (error) {
-            messageEl.textContent = `❌ ${error.message}`;
+          messageEl.textContent = `❌ ${error.message}`;
         } finally {
-            // Hide loading state (unless successful and redirecting)
-            if (!messageEl.textContent.startsWith('✅')) {
-                loginButton.disabled = false;
-                buttonText.textContent = "Sign In";
-                spinner.classList.add('hidden');
-            }
+          // Hide loading state (unless successful and redirecting)
+          if (!messageEl.textContent.startsWith("✅")) {
+            loginButton.disabled = false;
+            buttonText.textContent = "Sign In";
+            spinner.classList.add("hidden");
+          }
         }
       });
     </script>

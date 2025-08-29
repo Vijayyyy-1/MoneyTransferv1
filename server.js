@@ -16,28 +16,43 @@ app.use(cors());
 // const USERNAME = "Shivam";
 // const PASSWORD = "Shivam1234";
 // Hardcoded shop owners
-const SHOP_OWNERS = [
-  { username: "Shivam", password: "Shivam1234" },
-  { username: "Vijay", password: "Vijay73788" },
-];
+// const SHOP_OWNERS = [
+//   { username: "Shivam", password: "Shivam1234" },
+//   { username: "Vijay", password: "Vijay73788" },
+// ];
+const ownerSchema = new mongoose.Schema({
+  username: { type: String, unique: true },
+  password: String, // plaintext for now, ideally hash it with bcrypt
+});
 
-app.post("/login", (req, res) => {
+const Owner = mongoose.model("Owner", ownerSchema);
+
+
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   console.log("📝 Login attempt:", { username, password });
 
-  // Trim spaces just in case
-  const owner = SHOP_OWNERS.find(
-    (o) => o.username === username.trim() && o.password === password.trim()
-  );
+  try {
+    const owner = await Owner.findOne({ username: username.trim() });
 
-  if (owner) {
+    if (!owner) {
+      console.log("❌ Invalid login for:", username);
+      return res.json({ success: false, message: "Invalid username or password!" });
+    }
+
+    if (owner.password !== password.trim()) {
+      console.log("❌ Invalid login for:", username);
+      return res.json({ success: false, message: "Invalid username or password!" });
+    }
+
     console.log("✅ Login successful for:", owner.username);
-    return res.json({ success: true, owner: owner.username });
-  }
+    res.json({ success: true, owner: owner.username });
 
-  console.log("❌ Invalid login for:", username);
-  res.json({ success: false, message: "Invalid username or password!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
 
@@ -236,6 +251,30 @@ app.get("/transactions", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+// Signup route for new shop owners
+app.post("/signup", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Check if username already exists
+    const existingOwner = await Owner.findOne({ username: username.trim() });
+    if (existingOwner) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Username already exists" });
+    }
+
+    // Create new owner
+    const newOwner = new Owner({ username: username.trim(), password: password.trim() });
+    await newOwner.save();
+
+    res.status(201).json({ success: true, message: "Owner registered successfully!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 
 // Add a new transaction
 app.post("/transactions", async (req, res) => {
