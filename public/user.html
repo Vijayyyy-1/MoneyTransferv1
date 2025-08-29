@@ -286,7 +286,9 @@
           const params = new URLSearchParams(window.location.search);
           const userEmail = params.get("user");
 
-          const usersRes = await fetch(`${API_BASE_URL}/users`);
+          const loggedInOwner = localStorage.getItem("loggedInOwner");
+          const usersRes = await fetch(`${API_BASE_URL}/users?owner=${loggedInOwner}`);
+          // const usersRes = await fetch(`${API_BASE_URL}/users`);
           const users = await usersRes.json();
           const user = users.find((u) => u.email === userEmail);
           if (!user) {
