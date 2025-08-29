@@ -219,7 +219,7 @@ app.post("/users", async (req, res) => {
   try {
     const { name, email, whatsapp } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email, owner: req.body.owner });
     if (userExists) {
       return res
         .status(409)

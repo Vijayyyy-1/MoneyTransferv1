@@ -28,6 +28,7 @@
       </div>
 
       <form id="signupForm" class="space-y-6">
+        <!-- Username -->
         <div class="relative">
           <input
             type="text"
@@ -44,6 +45,7 @@
           >
         </div>
 
+        <!-- Password -->
         <div class="relative">
           <input
             type="password"
@@ -66,6 +68,23 @@
           >
             <i data-lucide="eye"></i>
           </button>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="relative">
+          <input
+            type="password"
+            id="confirmPassword"
+            required
+            minlength="8"
+            class="peer block w-full px-4 pt-5 pb-2 text-white bg-white/5 border border-white/30 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:outline-none placeholder-transparent pr-12"
+            placeholder="Confirm Password"
+          />
+          <label
+            for="confirmPassword"
+            class="absolute left-4 top-2 text-gray-300 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-200"
+            >Confirm Password</label
+          >
         </div>
 
         <button
@@ -99,6 +118,7 @@
       const signupForm = document.getElementById("signupForm");
       const toggleBtn = document.getElementById("togglePassword");
       const passwordInput = document.getElementById("password");
+      const confirmPasswordInput = document.getElementById("confirmPassword");
       const messageEl = document.getElementById("message");
 
       // Toggle password visibility
@@ -120,9 +140,15 @@
         e.preventDefault();
         messageEl.textContent = "";
 
+        // Check if passwords match
+        if (passwordInput.value !== confirmPasswordInput.value) {
+          messageEl.textContent = "❌ Passwords do not match!";
+          return;
+        }
+
         const payload = {
           username: document.getElementById("username").value.trim(),
-          password: document.getElementById("password").value.trim(),
+          password: passwordInput.value.trim(),
         };
 
         try {
